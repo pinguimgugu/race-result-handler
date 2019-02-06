@@ -3,8 +3,11 @@ package repository
 import (
 	"app/domain/entity"
 	"bufio"
+	"encoding/csv"
+	"fmt"
 	"os"
 	"regexp"
+	"strconv"
 )
 
 type RaceResult struct {
@@ -30,6 +33,34 @@ func (r *RaceResult) GetList() []entity.RacePilotStatistic {
 		r.raceList = append(r.raceList, r.parseLine(scanner.Text()))
 	}
 	return r.raceList
+}
+
+func (r *RaceResult) CreateClassification(classificationPilot []string, pilotStatistic map[string]entity.RacePilotStatistic) {
+
+	fileCsv, _ := os.OpenFile("result_classification.csv", os.O_CREATE|os.O_WRONLY, 0777)
+	defer fileCsv.Close()
+
+	position := 1
+
+	csvWriter := csv.NewWriter(fileCsv)
+	strWrite := []string{"POSICAO", "CODIGO", "NOME", "VOLTAS", "TEMPO", "MEDIA VELOCIDADE CORRIDA"}
+	csvWriter.Write(strWrite)
+
+	for _, pilotNumber := range classificationPilot {
+
+		value := []string{
+			strconv.Itoa(position),
+			pilotStatistic[pilotNumber].Number,
+			pilotStatistic[pilotNumber].Name,
+			strconv.Itoa(pilotStatistic[pilotNumber].LapAmount),
+			pilotStatistic[pilotNumber].RaceTime,
+			fmt.Sprintf("%f", pilotStatistic[pilotNumber].SpeedRaceAverage),
+		}
+
+		csvWriter.Write(value)
+		csvWriter.Flush()
+		position++
+	}
 }
 
 func (r *RaceResult) isTopOfFile(line int) bool {

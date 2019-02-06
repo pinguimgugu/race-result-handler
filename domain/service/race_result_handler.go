@@ -3,7 +3,6 @@ package service
 import (
 	"app/domain/contract"
 	"app/domain/entity"
-	"fmt"
 	"sync"
 )
 
@@ -47,10 +46,7 @@ func (rh *RaceResultHandler) CreateDetailed() {
 		wg.Wait()
 	}()
 
-	pilotMetricList := <-pilotMetricChan
-	for _, data := range <-raceClassificationChan {
-		fmt.Println(pilotMetricList[data])
-	}
+	rh.raceResultRepository.CreateClassification(<-raceClassificationChan, <-pilotMetricChan)
 }
 
 func (rh *RaceResultHandler) groupResultByPilot(resultList []entity.RacePilotStatistic) map[string][]entity.RacePilotStatistic {
