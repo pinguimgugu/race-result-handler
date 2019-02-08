@@ -2,34 +2,33 @@ package service
 
 import (
 	"app/domain/entity"
-	"fmt"
+	"app/infrastructure/formater"
 	"sort"
-	"time"
 )
 
 type RacerClassifier struct {
 	MaxLapNumber    int
-	punishmentByLap map[int]int64
+	punishmentByLap map[int]int
 }
 
 func NewRacerClassifier() *RacerClassifier {
 	return &RacerClassifier{
 		4,
-		map[int]int64{
-			1: 999999999999999,
-			2: 99999999999999,
-			3: 9999999999999,
+		map[int]int{
+			1: 1000000000,
+			2: 100000000,
+			3: 10000000,
 			4: 0,
 		},
 	}
 }
 
 func (rc *RacerClassifier) Make(resultByPilot map[string][]entity.RacePilotStatistic) []string {
-	classification := map[int][]map[int64]string{}
+	classification := map[int][]map[int]string{}
 
 	for pilotNumber, data := range resultByPilot {
 		amountLapFinished := len(data)
-		classification[amountLapFinished] = append(classification[amountLapFinished], map[int64]string{
+		classification[amountLapFinished] = append(classification[amountLapFinished], map[int]string{
 			rc.getTotalRaceTimePilot(data): pilotNumber,
 		})
 	}
@@ -37,33 +36,22 @@ func (rc *RacerClassifier) Make(resultByPilot map[string][]entity.RacePilotStati
 	return rc.orderClassification(classification)
 }
 
-func (rc *RacerClassifier) getTotalRaceTimePilot(data []entity.RacePilotStatistic) int64 {
-	var totalTimeUnixFormat int64
-	raceDay := time.Now()
+func (rc *RacerClassifier) getTotalRaceTimePilot(data []entity.RacePilotStatistic) int {
+	var totalTimeInt int
 
 	for _, lap := range data {
-		totalTimeUnixFormat += rc.convertToUnixFormat(raceDay, lap.LapTime)
+		totalTimeInt += formater.ParseTimeToIntValue(lap.LapTime)
 	}
 
-	return totalTimeUnixFormat
+	return totalTimeInt
 }
 
-func (rc *RacerClassifier) convertToUnixFormat(raceDay time.Time, lapTime string) int64 {
-	layout := "20060102 15:04:05.000"
-	stringDate := fmt.Sprintf("%d%02d%02d %02d:0%s",
-		raceDay.Year(), raceDay.Month(), raceDay.Day(),
-		raceDay.Hour(), lapTime)
-	t2, _ := time.Parse(layout, stringDate)
-
-	return t2.Unix()
-}
-
-func (rc *RacerClassifier) orderClassification(classification map[int][]map[int64]string) []string {
+func (rc *RacerClassifier) orderClassification(classification map[int][]map[int]string) []string {
 	var lapsOrdered []int
-	var orderedLapsTime []int64
+	var orderedLapsTime []int
 	var fineshedClassification []string
-	timeByPilot := make(map[int64]string)
-	for numberLaps, _ := range classification {
+	timeByPilot := make(map[int]string)
+	for numberLaps := range classification {
 		lapsOrdered = append(lapsOrdered, numberLaps)
 	}
 

@@ -1,6 +1,10 @@
 package formater
 
-import "fmt"
+import (
+	"fmt"
+	"strconv"
+	"strings"
+)
 
 func FormatBySeconds(timeInSeconds int) string {
 	var raceTime string
@@ -16,4 +20,10 @@ func FormatBySeconds(timeInSeconds int) string {
 
 	return raceTime
 
+}
+
+func ParseTimeToIntValue(timeFormat string) int {
+	intValue, _ := strconv.Atoi(strings.Replace(strings.Replace(timeFormat, ":", "", -1), ".", "", -1))
+
+	return intValue
 }

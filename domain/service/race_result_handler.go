@@ -3,16 +3,15 @@ package service
 import (
 	"app/domain/contract"
 	"app/domain/entity"
-	"sync"
 )
 
 type RaceResultHandler struct {
 	raceResultRepository contract.RaceResultRepository
 	racerClassifier      contract.RacerClassifier
-	raceMetricBuilder    contract.RaceMetricBuilder
+	PilotResultBuilder   contract.PilotResultBuilder
 }
 
-func NewRaceResultHandler(rrr contract.RaceResultRepository, rc contract.RacerClassifier, rmb contract.RaceMetricBuilder) *RaceResultHandler {
+func NewRaceResultHandler(rrr contract.RaceResultRepository, rc contract.RacerClassifier, rmb contract.PilotResultBuilder) *RaceResultHandler {
 	return &RaceResultHandler{rrr, rc, rmb}
 }
 
@@ -21,29 +20,19 @@ func (rh *RaceResultHandler) CreateDetailed() {
 		rh.raceResultRepository.GetList(),
 	)
 
-	var wg sync.WaitGroup
-	wg.Add(2)
-
 	pilotMetricChan := make(chan map[string]entity.RacePilotStatistic)
 	raceClassificationChan := make(chan []string)
 
 	go func() {
 		pilotMetric := make(map[string]entity.RacePilotStatistic)
 		for pilotNumber, laps := range groupedResultByPilot {
-			pilotMetric[pilotNumber] = rh.raceMetricBuilder.Build(laps)
+			pilotMetric[pilotNumber] = rh.PilotResultBuilder.Build(laps)
 		}
-
 		pilotMetricChan <- pilotMetric
-		wg.Done()
 	}()
 
 	go func() {
 		raceClassificationChan <- rh.racerClassifier.Make(groupedResultByPilot)
-		wg.Done()
-	}()
-
-	go func() {
-		wg.Wait()
 	}()
 
 	rh.raceResultRepository.CreateClassification(<-raceClassificationChan, <-pilotMetricChan)

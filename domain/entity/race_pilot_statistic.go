@@ -9,5 +9,5 @@ type RacePilotStatistic struct {
 	SpeedLapAverage  string
 	LapAmount        int
 	SpeedRaceAverage float64
-	BestLapTime      string
+	BestLap          string
 }

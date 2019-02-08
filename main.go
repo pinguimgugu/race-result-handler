@@ -11,7 +11,7 @@ func main() {
 	raceResultHandler := service.NewRaceResultHandler(
 		repository.NewRaceResult(),
 		service.NewRacerClassifier(),
-		service.NewRaceMetricBuilder(),
+		service.NewPilotResultBuilder(),
 	)
 
 	application.NewApplication(raceResultHandler).Run()

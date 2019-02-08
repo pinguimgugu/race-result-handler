@@ -2,6 +2,7 @@ package repository
 
 import (
 	"app/domain/entity"
+	"app/domain/service"
 	"bufio"
 	"encoding/csv"
 	"fmt"
@@ -36,18 +37,19 @@ func (r *RaceResult) GetList() []entity.RacePilotStatistic {
 }
 
 func (r *RaceResult) CreateClassification(classificationPilot []string, pilotStatistic map[string]entity.RacePilotStatistic) {
-
 	fileCsv, _ := os.OpenFile("result_classification.csv", os.O_CREATE|os.O_WRONLY, 0777)
 	defer fileCsv.Close()
 
 	position := 1
 
 	csvWriter := csv.NewWriter(fileCsv)
-	strWrite := []string{"POSICAO", "CODIGO", "NOME", "VOLTAS", "TEMPO", "MEDIA VELOCIDADE CORRIDA"}
+	strWrite := []string{"POSICAO", "CODIGO", "NOME", "VOLTAS", "TEMPO", "MEDIA VELOCIDADE CORRIDA", "MELHOR VOLTA"}
 	csvWriter.Write(strWrite)
 
+	identifierBestLap := new(service.IdentifierBestLap)
 	for _, pilotNumber := range classificationPilot {
 
+		identifierBestLap.Attach(pilotStatistic[pilotNumber])
 		value := []string{
 			strconv.Itoa(position),
 			pilotStatistic[pilotNumber].Number,
@@ -55,12 +57,26 @@ func (r *RaceResult) CreateClassification(classificationPilot []string, pilotSta
 			strconv.Itoa(pilotStatistic[pilotNumber].LapAmount),
 			pilotStatistic[pilotNumber].RaceTime,
 			fmt.Sprintf("%f", pilotStatistic[pilotNumber].SpeedRaceAverage),
+			pilotStatistic[pilotNumber].BestLap,
 		}
-
+		fmt.Println(value)
 		csvWriter.Write(value)
 		csvWriter.Flush()
 		position++
 	}
+	csvWriter.Write([]string{"MELHOR VOLTA CORRIDA"})
+	csvWriter.Flush()
+	csvWriter.Write([]string{"CODIGO PILOTO", "TEMPO"})
+	csvWriter.Flush()
+
+	pilotNumber, timeLap := identifierBestLap.Get()
+	bestLap := []string{pilotNumber, timeLap}
+	csvWriter.Write(bestLap)
+	csvWriter.Flush()
+
+	fmt.Println("Piloto | Melhor volta")
+	fmt.Println(bestLap)
+	fmt.Println("csv created")
 }
 
 func (r *RaceResult) isTopOfFile(line int) bool {
