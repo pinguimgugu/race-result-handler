@@ -16,7 +16,7 @@ Make sure you have installed
     ./development.sh run-unit
  ```
 
-# Run  classification race process
+# Running classification race process
  ```
     ./development.sh run
  ```
