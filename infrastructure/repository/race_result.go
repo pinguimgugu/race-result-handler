@@ -3,6 +3,7 @@ package repository
 import (
 	"app/domain/entity"
 	"app/domain/service"
+	"app/infrastructure/formater"
 	"bufio"
 	"encoding/csv"
 	"fmt"
@@ -43,11 +44,25 @@ func (r *RaceResult) CreateClassification(classificationPilot []string, pilotSta
 	position := 1
 
 	csvWriter := csv.NewWriter(fileCsv)
-	strWrite := []string{"POSICAO", "CODIGO", "NOME", "VOLTAS", "TEMPO", "MEDIA VELOCIDADE CORRIDA", "MELHOR VOLTA"}
+	strWrite := []string{"POSICAO", "CODIGO", "NOME", "VOLTAS", "TEMPO", "MEDIA VELOCIDADE CORRIDA", "MELHOR VOLTA", "DIFERENCA TEMPO PARA VENCEDOR"}
 	csvWriter.Write(strWrite)
+
+	differenceTimeToWinner := "00:00"
+	timeRaceWinner := ""
 
 	identifierBestLap := new(service.IdentifierBestLap)
 	for _, pilotNumber := range classificationPilot {
+
+		if position == 1 {
+			timeRaceWinner = pilotStatistic[pilotNumber].RaceTime
+		}
+
+		if position > 1 {
+			differenceTimeToWinner = formater.CalculateDifferenceDates(
+				timeRaceWinner,
+				pilotStatistic[pilotNumber].RaceTime,
+			)
+		}
 
 		identifierBestLap.Attach(pilotStatistic[pilotNumber])
 		value := []string{
@@ -58,6 +73,7 @@ func (r *RaceResult) CreateClassification(classificationPilot []string, pilotSta
 			pilotStatistic[pilotNumber].RaceTime,
 			fmt.Sprintf("%f", pilotStatistic[pilotNumber].SpeedRaceAverage),
 			pilotStatistic[pilotNumber].BestLap,
+			differenceTimeToWinner,
 		}
 		fmt.Println(value)
 		csvWriter.Write(value)

@@ -40,3 +40,15 @@ func TestShouldBeReturnFormatedDataPassing60Seconds(t *testing.T) {
 	formated := FormatBySeconds(60)
 	assert.Equal(t, want, formated)
 }
+
+func TestShouldBeReturnFormatedDateDiffInSeconds(t *testing.T) {
+	want := "00:50"
+	formated := CalculateDifferenceDates("02:00", "02:50")
+	assert.Equal(t, want, formated)
+}
+
+func TestShouldBeReturnFormatedDateDiffOneMinute(t *testing.T) {
+	want := "01:00"
+	formated := CalculateDifferenceDates("02:00", "03:00")
+	assert.Equal(t, want, formated)
+}
