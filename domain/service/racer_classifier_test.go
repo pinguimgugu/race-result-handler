@@ -69,3 +69,19 @@ func (suite *RacerClassifierSuite) TestShouldBeReturnSortedListWithPiloNumberAnd
 	classificationRace := racerClassifier.Make(groupedResult)
 	suite.Equal([]string{"002", "001", "003"}, classificationRace)
 }
+
+func (suite *RacerClassifierSuite) TestShouldBeReturnSortedListWithPiloNumberAndLastPositionPilotWithOneCompletedLap() {
+	groupedResult := map[string][]entity.RacePilotStatistic{}
+
+	groupedResult["001"] = append(groupedResult["001"], entity.RacePilotStatistic{Number: "001", LapTime: "1:02.000"})
+	groupedResult["001"] = append(groupedResult["001"], entity.RacePilotStatistic{Number: "001", LapTime: "1:01.700"})
+	groupedResult["001"] = append(groupedResult["001"], entity.RacePilotStatistic{Number: "001", LapTime: "1:06.000"})
+
+	groupedResult["002"] = append(groupedResult["002"], entity.RacePilotStatistic{Number: "002", LapTime: "1:02.000"})
+	groupedResult["002"] = append(groupedResult["002"], entity.RacePilotStatistic{Number: "002", LapTime: "1:06.000"})
+
+	groupedResult["003"] = append(groupedResult["003"], entity.RacePilotStatistic{Number: "003", LapTime: "1:30.000"})
+	racerClassifier := NewRacerClassifier()
+	classificationRace := racerClassifier.Make(groupedResult)
+	suite.Equal([]string{"001", "002", "003"}, classificationRace)
+}
