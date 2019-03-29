@@ -14,5 +14,4 @@ function build {
 function run-unit {
     docker-compose up unit
 }
-
 "$@"
